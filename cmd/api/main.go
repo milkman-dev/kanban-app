@@ -1,36 +1,35 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
 )
 
 type HealthResponse struct {
 	Status string `json:"status"`
 }
 
-func handler(ctx context.Context, request events.APIGatewayWebsocketProxyRequest) (events.APIGatewayProxyStreamingResponse, error) {
+func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	h := HealthResponse{Status: "OK"}
 
 	body, err := json.Marshal(h)
 	if err != nil {
-		return events.APIGatewayProxyStreamingResponse{}, err
+		return events.APIGatewayProxyResponse{}, err
 	}
 
-	return events.APIGatewayProxyStreamingResponse{
+	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Body:       bytes.NewReader(body),
+		Body:       string(body),
 		Headers: map[string]string{
 			"Content-Type": "application/json",
 		},
 	}, nil
-
 }
 
 func main() {
-
+	lambda.Start(handler)
 }
